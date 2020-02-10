@@ -3,6 +3,7 @@
  */
 
 // Deps
+const config = require('./config');
 const http = require('http');
 const url = require('url');
 // for payloads
@@ -44,6 +45,8 @@ const server = http.createServer((req, res) => {
         typeof payload === 'object'
           ? JSON.stringify(payload)
           : JSON.stringify({});
+      // set headers
+      res.setHeader('Content-Type', 'application/json');
       // write status code to response
       res.writeHead(status);
       // end response and attach payload
@@ -54,8 +57,8 @@ const server = http.createServer((req, res) => {
 });
 
 // Start server, listen on port 3000
-server.listen(3000, () => {
-  console.log('Server listening on port 3000');
+server.listen(config.port, () => {
+  console.log('Server listening on port ', config.port);
 });
 
 // Define request handlers
