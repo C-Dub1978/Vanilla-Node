@@ -4,13 +4,42 @@
 
 // Deps
 const config = require('./config');
+const fs = require('fs');
+const handlers = require('./lib/handlers');
 const http = require('http');
+const https = require('https');
+const _data = require('./lib/data');
 const url = require('url');
 // for payloads
 const stringDecoder = require('string_decoder').StringDecoder;
 
-// Server should response to GET, POST, PUT, DELTE, HEAD
-const server = http.createServer((req, res) => {
+// create httpsOptions
+const httpsServerOptions = {
+  key: fs.readFileSync('../certs/key.pem'),
+  cert: fs.readFileSync('../certs/cert.pem')
+};
+
+// Servers should response to GET, POST, PUT, DELTE, HEAD - instantiate them
+const httpServer = http.createServer((req, res) => {
+  unifiedServer(req, res);
+});
+
+const httpsServer = https.createServer(httpsServerOptions, (req, res) => {
+  unifiedServer(req, res);
+});
+
+// Start http server
+httpServer.listen(config.httpPort, () => {
+  console.log('Server listening on http port ', config.httpPort);
+});
+
+// Start https server
+httpsServer.listen(config.httpsPort, () => {
+  console.log('Server listening on https port: ', config.httpsPort);
+});
+
+// handle both http and https server logic
+const unifiedServer = (req, res) => {
   const method = req.method.toLowerCase();
   const parsedUrl = url.parse(req.url, true);
   const path = parsedUrl.pathname;
@@ -54,25 +83,10 @@ const server = http.createServer((req, res) => {
       console.log('Returning response: ', status, payload);
     });
   });
-});
-
-// Start server, listen on port 3000
-server.listen(config.port, () => {
-  console.log('Server listening on port ', config.port);
-});
-
-// Define request handlers
-const handlers = {
-  sample: (data, callback) => {
-    // Callback an http status code and payload object
-    callback(406, { name: 'sample-handler' });
-  },
-  notFound: (data, callback) => {
-    callback(404);
-  }
 };
 
 // Define request router
 const router = {
-  sample: handlers.sample
+  hello: handlers.hello,
+  ping: handlers.ping
 };
