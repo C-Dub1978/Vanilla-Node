@@ -6,6 +6,7 @@
 const config = require('./config');
 const fs = require('fs');
 const handlers = require('./lib/handlers');
+const helpers = require('./lib/helpers');
 const http = require('http');
 const https = require('https');
 const _data = require('./lib/data');
@@ -63,7 +64,7 @@ const unifiedServer = (req, res) => {
       queryString,
       method,
       headers,
-      payload: buf
+      payload: helpers.parseJsonToObject(buf)
     };
     // route request to specified path
     chosenHandler(data, (status, payload) => {
