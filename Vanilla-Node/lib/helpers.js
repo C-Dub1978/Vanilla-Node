@@ -5,6 +5,52 @@ const crypto = require('crypto');
 const helpers = {};
 
 /**
+ * Confirm first name
+ *
+ * @params firstName
+ * @returns {string} trimmed first name || {boolean}
+ */
+helpers.confirmName = name => {
+  return typeof name === 'string' && name.trim().length > 0
+    ? name.trim()
+    : false;
+};
+
+/**
+ * Confirm password
+ *
+ * @param password
+ * @returns {string} trimmed password || {boolean}
+ */
+helpers.confirmPassword = password => {
+  return typeof password === 'string' && password.trim().length > 0
+    ? password.trim()
+    : false;
+};
+
+/**
+ * Confirm phone number
+ *
+ * @param phoneNumber
+ * @returns {string} trimmed phone number || {boolean}
+ */
+helpers.confirmPhoneNumber = phoneNumber => {
+  return typeof phoneNumber === 'string' && phoneNumber.trim().length === 10
+    ? phoneNumber.trim()
+    : false;
+};
+
+/**
+ * Confirm tosAgreement
+ *
+ * @param tosAgreement
+ * @returns {boolean}
+ */
+helpers.confirmTosAgreement = tosAgreement => {
+  return typeof tosAgreement === 'boolean' && tosAgreement === true;
+};
+
+/**
  * Hash the password string
  *
  * @param pass the password
@@ -36,7 +82,6 @@ helpers.parseJsonToObject = json => {
       return {};
     }
   }
-  return JSON.parse(json);
 };
 
 module.exports = helpers;

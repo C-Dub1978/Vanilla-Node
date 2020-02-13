@@ -81,7 +81,6 @@ const unifiedServer = (req, res) => {
       res.writeHead(status);
       // end response and attach payload
       res.end(payload);
-      console.log('Returning response: ', status, payload);
     });
   });
 };

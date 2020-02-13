@@ -4,6 +4,7 @@
 
 // Define deps
 const fs = require('fs');
+const helpers = require('./helpers');
 const path = require('path');
 
 // Module container
@@ -51,6 +52,23 @@ lib.create = (dir, fileName, data, callback) => {
 };
 
 /**
+ * Delete operation
+ *
+ * @param dir the directory to search
+ * @param file the filename to open
+ * @param callback the callback function
+ */
+lib.delete = (dir, file, callback) => {
+  fs.unlink(lib.baseDir + dir + '/' + file + '.json', err => {
+    if (!err) {
+      callback(false);
+    } else {
+      callback('Error unlinking file from file system');
+    }
+  });
+};
+
+/**
  * Read function
  *
  * @param dir the directory to find the file to open
@@ -59,7 +77,11 @@ lib.create = (dir, fileName, data, callback) => {
  */
 lib.read = (dir, file, callback) => {
   fs.readFile(lib.baseDir + dir + '/' + file + '.json', 'utf8', (err, data) => {
-    callback(err, data);
+    if (!err && data) {
+      callback(false, helpers.parseJsonToObject(data));
+    } else {
+      callback(err, data);
+    }
   });
 };
 
@@ -103,23 +125,6 @@ lib.update = (dir, file, data, callback) => {
       }
     }
   );
-};
-
-/**
- * Delete operation
- *
- * @param dir the directory to search
- * @param file the filename to open
- * @param callback the callback function
- */
-lib.delete = (dir, file, callback) => {
-  fs.unlink(lib.baseDir + dir + '/' + file + '.json', err => {
-    if (!err) {
-      callback(false);
-    } else {
-      callback('Error unlinking file from file system');
-    }
-  });
 };
 
 module.exports = lib;
