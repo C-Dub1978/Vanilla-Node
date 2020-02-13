@@ -9,7 +9,6 @@ const handlers = require('./lib/handlers');
 const helpers = require('./lib/helpers');
 const http = require('http');
 const https = require('https');
-const _data = require('./lib/data');
 const url = require('url');
 // for payloads
 const stringDecoder = require('string_decoder').StringDecoder;

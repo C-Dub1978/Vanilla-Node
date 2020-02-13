@@ -51,6 +51,24 @@ helpers.confirmTosAgreement = tosAgreement => {
 };
 
 /**
+ * Function to create a random string of letters for a token
+ *
+ * @params number the character length
+ */
+helpers.createRandomString = length => {
+  const strLength = typeof length === 'number' && length > 0 ? length : 20;
+  const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
+  let randomStr = '';
+  for (let i = 0; i < strLength; i++) {
+    randomStr += chars.charAt(
+      Math.floor(Math.random() * Math.floor(strLength + 1))
+    );
+  }
+  console.log('Random string: ', randomStr);
+  return randomStr;
+};
+
+/**
  * Hash the password string
  *
  * @param pass the password
