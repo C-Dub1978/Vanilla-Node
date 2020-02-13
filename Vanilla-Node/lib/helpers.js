@@ -1,8 +1,19 @@
+// Deps
 const config = require('../config');
 const crypto = require('crypto');
 
 // Helper functions
 const helpers = {};
+
+/**
+ * Confirm extends token boolean
+ *
+ * @param extends
+ * @returns {boolean}
+ */
+helpers.confirmExtendTokenBool = extend => {
+  return typeof extend === 'boolean' && extend;
+};
 
 /**
  * Confirm first name
@@ -41,6 +52,16 @@ helpers.confirmPhoneNumber = phoneNumber => {
 };
 
 /**
+ * Confirm token
+ *
+ * @param tokenId
+ * @returns string tokenId trimmed or false
+ */
+helpers.confirmTokenId = id => {
+  return typeof id === 'string' && id.trim().length === 20 ? id.trim() : false;
+};
+
+/**
  * Confirm tosAgreement
  *
  * @param tosAgreement
@@ -64,7 +85,6 @@ helpers.createRandomString = length => {
       Math.floor(Math.random() * Math.floor(strLength + 1))
     );
   }
-  console.log('Random string: ', randomStr);
   return randomStr;
 };
 

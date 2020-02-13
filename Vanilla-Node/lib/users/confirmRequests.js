@@ -2,6 +2,7 @@
 const helpers = require('../helpers');
 const _lib = require('../data');
 
+// Module container
 const usersConfirm = {
   delete: (data, callback) => confirmDeleteData(data, callback),
   get: (data, callback) => confirmGetData(data, callback),
@@ -10,15 +11,26 @@ const usersConfirm = {
 };
 
 const USERS_DIR = 'users';
+const TOKENS_DIR = 'tokens';
 
 /**
  * Confirm delete request
  *
- * @param {*} data the queryString
- * @param function callback the callback function
+ * @param {string} data the queryString phoneNumber
+ * @param {function} callback the callback function
  */
 function confirmDeleteData(data, callback) {
   const phoneNumber = helpers.confirmPhoneNumber(data.queryString.phoneNumber);
+  const headerToken = helpers.confirmTokenId(data.headers.tokenid);
+  if (!headerToken) {
+    return callback(400, {
+      error: 'Invalid token or token missing from header'
+    });
+  }
+  const valid = verifyValidToken(headerToken, phoneNumber);
+  if (!valid) {
+    return callback(400, { error: 'Invalid token, cannot delete data' });
+  }
   if (phoneNumber) {
     _lib.read(USERS_DIR, phoneNumber, (err, data) => {
       if (!err && data) {
@@ -42,30 +54,39 @@ function confirmDeleteData(data, callback) {
 /**
  * Confirm get request
  *
- * @param {*} data the queryString
- * @param function callback the callback function
+ * @param {string} data the queryString
+ * @param {function} callback the callback function
  */
 function confirmGetData(data, callback) {
   const phoneNumber = helpers.confirmPhoneNumber(data.queryString.phoneNumber);
-  if (phoneNumber) {
-    _lib.read(USERS_DIR, phoneNumber, (err, data) => {
-      if (!err && data) {
-        // remove hashed password
-        delete data.password;
-        return callback(200, data);
-      } else {
-        return callback(404);
-      }
+  const headerToken = helpers.confirmTokenId(data.headers.tokenid);
+  if (!headerToken || !phoneNumber) {
+    return callback(400, {
+      error: 'Invalid credentials or missing credentials'
     });
-  } else {
   }
+  verifyValidToken(headerToken, phoneNumber, status => {
+    if (phoneNumber && headerToken && status) {
+      _lib.read(USERS_DIR, phoneNumber, (err, data) => {
+        if (!err && data) {
+          // remove hashed password
+          delete data.password;
+          return callback(200, data);
+        } else {
+          return callback(404);
+        }
+      });
+    } else {
+      return callback(403, { error: 'Could not verify user credentials' });
+    }
+  });
 }
 
 /**
  * Confirm post request to create user
  *
- * @param {*} data the request payload
- * @param function callback the callback function
+ * @param {string, string, string, string, boolean} data the request payload
+ * @param {function} callback the callback function
  */
 function confirmPostData(data, callback) {
   const firstName = helpers.confirmName(data.payload.firstName);
@@ -109,8 +130,8 @@ function confirmPostData(data, callback) {
 /**
  * Confirm put request
  *
- * @param {*} data the queryString
- * @param function callback the callback function
+ * @param {string, string, string, string} data the queryString strings
+ * @param {function} callback the callback function
  */
 function confirmPutData(data, callback) {
   const phoneNumber = helpers.confirmPhoneNumber(data.payload.phoneNumber);
@@ -118,6 +139,16 @@ function confirmPutData(data, callback) {
   const lastName = helpers.confirmName(data.payload.lastName);
   const password = helpers.confirmPassword(data.payload.password);
 
+  const headerToken = helpers.confirmTokenId(data.headers.tokenid);
+  if (!headerToken) {
+    return callback(400, {
+      error: 'Invalid token or token missing from header'
+    });
+  }
+  const valid = verifyValidToken(headerToken, phoneNumber);
+  if (!valid) {
+    return callback(400, { error: 'Invalid token, cannot put data' });
+  }
   // error out if we dont have both phoneNumber AND 1 of the optional params
   if (phoneNumber) {
     if (firstName || lastName || password) {
@@ -154,6 +185,27 @@ function confirmPutData(data, callback) {
   } else {
     return callback(400, { error: 'Missing phone number' });
   }
+}
+
+/**
+ * Verify token is valid and unexpired
+ *
+ * @param {string, string} data the tokenId and phoneNumber
+ * @returns {function} callback the callback function
+ */
+function verifyValidToken(tokenId, phoneNumber, callback) {
+  if (!phoneNumber || !tokenId) {
+    return callback(false);
+  }
+  _lib.read(TOKENS_DIR, tokenId, (err, data) => {
+    if (!err && data) {
+      return callback(
+        data.phoneNumber === phoneNumber && data.expires > Date.now()
+      );
+    } else {
+      return callback(false);
+    }
+  });
 }
 
 module.exports = usersConfirm;

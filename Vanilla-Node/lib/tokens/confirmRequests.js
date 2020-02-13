@@ -2,6 +2,7 @@
 const _lib = require('../data');
 const helpers = require('../helpers');
 
+// Module container
 const tokensConfirm = {
   delete: (data, callback) => confirmDeleteToken(data, callback),
   get: (data, callback) => confirmGetToken(data, callback),
@@ -15,27 +16,62 @@ const TOKENS_DIR = 'tokens';
 /**
  * Confirm delete request
  *
- * @param {*} data
- * @param function callback the callback function
+ * @param {string} data the tokenId
+ * @param {function} callback the callback function
  */
-function confirmDeleteToken(data, callback) {}
+function confirmDeleteToken(data, callback) {
+  // Validate tokenId
+  const tokenId = helpers.confirmTokenId(data.queryString.tokenId);
+  if (tokenId) {
+    _lib.read(TOKENS_DIR, tokenId, (err, data) => {
+      if (!err && data) {
+        // Delete all token data
+        _lib.delete(TOKENS_DIR, tokenId, status => {
+          if (!status) {
+            return callback(200, { status: 'Ok deleting token data' });
+          } else {
+            return callback(500, { error: 'Error deleting token data' });
+          }
+        });
+      } else {
+        return callback(400, { error: 'Erro reading that token id' });
+      }
+    });
+  } else {
+    return callback(400, { error: 'Missing tokenId to validate' });
+  }
+}
 
 /**
  * Confirm get request
  *
- * @param data
+ * @param {string } data the tokenId
  * @param function callback the callback function
  */
-function confirmGetToken() {}
+function confirmGetToken(data, callback) {
+  const tokenId = helpers.confirmTokenId(data.queryString.tokenId);
+  if (tokenId) {
+    _lib.read(TOKENS_DIR, tokenId, (err, data) => {
+      if (!err && data) {
+        return callback(200, data);
+      } else {
+        return callback(500, { error: 'Error reading token' });
+      }
+    });
+  } else {
+    return callback(400, {
+      error: 'Missing or invalid tokenId param for get request'
+    });
+  }
+}
 
 /**
  * Confirm post request
  *
- * @param data
- * @param function callback the callback function
+ * @param {string, string} data phoneNumber and password
+ * @param {function} callback the callback function
  */
 function confirmPostToken(data, callback) {
-  console.log('Payload: ', data.payload);
   const phoneNumber = helpers.confirmPhoneNumber(data.payload.phoneNumber);
   const password = helpers.confirmPassword(data.payload.password);
   if (phoneNumber && password) {
@@ -78,11 +114,40 @@ function confirmPostToken(data, callback) {
 }
 
 /**
- * Confirm put request
+ * Confirm put request, ONLY used to extend a token expiration date, nothing else
  *
- * @param data
- * @param function callback the callback function
+ * @param {string, boolean } data token id and extend boolean
+ * @param {function} callback the callback function
  */
-function confirmPutToken() {}
+function confirmPutToken(data, callback) {
+  const id = helpers.confirmTokenId(data.payload.tokenId);
+  const extend = helpers.confirmExtendTokenBool(data.payload.extend);
+  if (id && extend) {
+    // Get token
+    _lib.read(TOKENS_DIR, id, (err, data) => {
+      if (!err && data) {
+        // Ensure token isnt expired
+        if (data.expires > Date.now()) {
+          // Extend to 1 hour from now
+          data.expires = Date.now() + 1000 * 60 * 60;
+          // Store new token file
+          _lib.update(TOKENS_DIR, id, data, status => {
+            if (!status) {
+              return callback(200, { status: 'Ok extending token' });
+            } else {
+              return callback(500, { error: 'Error extending token' });
+            }
+          });
+        } else {
+          return callback(400, { error: 'Token is expired, cannot extend' });
+        }
+      } else {
+        return callback(500, { error: 'Error reading token' });
+      }
+    });
+  } else {
+    return callback(400, { error: 'Missing required params in put request' });
+  }
+}
 
 module.exports = tokensConfirm;

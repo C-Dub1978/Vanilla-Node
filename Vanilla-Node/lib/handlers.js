@@ -47,8 +47,7 @@ handlers._tokens = {
   post: (data, callback) => {
     return tokensConfirm.post(data, callback);
   },
-  // required data: phoneNumber
-  // optional data: first, last, pass - at least 1 MUST be specified to put/update
+  // required data: tokenId and extend boolean
   // TODO only let authenticated user update their own data
   put: (data, callback) => {
     return tokensConfirm.put(data, callback);
