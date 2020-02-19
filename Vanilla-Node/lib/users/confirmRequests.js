@@ -22,16 +22,15 @@ const TOKENS_DIR = 'tokens';
 function confirmDeleteData(data, callback) {
   const phoneNumber = helpers.confirmPhoneNumber(data.queryString.phoneNumber);
   const headerToken = helpers.confirmTokenId(data.headers.tokenid);
-  if (!headerToken) {
+  if (!headerToken || !phoneNumber) {
     return callback(400, {
-      error: 'Invalid token or token missing from header'
+      error: 'Invalid token/phoneNumber or token missing from header'
     });
   }
-  const valid = verifyValidToken(headerToken, phoneNumber);
-  if (!valid) {
-    return callback(400, { error: 'Invalid token, cannot delete data' });
-  }
-  if (phoneNumber) {
+  verifyValidToken(headerToken, phoneNumber, status => {
+    if (!status) {
+      return callback(400, { error: 'Invalid token, cannot delete data' });
+    }
     _lib.read(USERS_DIR, phoneNumber, (err, data) => {
       if (!err && data) {
         _lib.delete(USERS_DIR, phoneNumber, status => {
@@ -46,9 +45,7 @@ function confirmDeleteData(data, callback) {
         return callback(400, { error: 'User not found for delete' });
       }
     });
-  } else {
-    return callback(400, { error: 'Missing phone number to delete' });
-  }
+  });
 }
 
 /**
@@ -66,7 +63,7 @@ function confirmGetData(data, callback) {
     });
   }
   verifyValidToken(headerToken, phoneNumber, status => {
-    if (phoneNumber && headerToken && status) {
+    if (status) {
       _lib.read(USERS_DIR, phoneNumber, (err, data) => {
         if (!err && data) {
           // remove hashed password
@@ -145,46 +142,47 @@ function confirmPutData(data, callback) {
       error: 'Invalid token or token missing from header'
     });
   }
-  const valid = verifyValidToken(headerToken, phoneNumber);
-  if (!valid) {
-    return callback(400, { error: 'Invalid token, cannot put data' });
-  }
-  // error out if we dont have both phoneNumber AND 1 of the optional params
-  if (phoneNumber) {
-    if (firstName || lastName || password) {
-      _lib.read(USERS_DIR, phoneNumber, (err, data) => {
-        if (!err && data) {
-          if (firstName) {
-            data.firstName = firstName;
-          }
-          if (lastName) {
-            data.lastName = lastName;
-          }
-          if (password) {
-            const hashedPassword = helpers.hash(password);
-            if (hashedPassword) {
-              data.password = hashedPassword;
-            } else {
-              return callback(500, { error: 'Hash error' });
-            }
-          }
-          // Write new data
-          _lib.update(USERS_DIR, phoneNumber, data, status => {
-            // Successful update of data
-            if (!status) {
-              return callback(300, { status: 'Update ok' });
-            } else {
-              return callback(500, { error: status });
-            }
-          });
-        } else {
-          return callback(400, { error: 'User does not exist' });
-        }
-      });
+  verifyValidToken(headerToken, phoneNumber, status => {
+    if (!status) {
+      return callback(400, { error: 'Invalid token, cannot put data' });
     }
-  } else {
-    return callback(400, { error: 'Missing phone number' });
-  }
+    // error out if we dont have both phoneNumber AND 1 of the optional params
+    if (phoneNumber) {
+      if (firstName || lastName || password) {
+        _lib.read(USERS_DIR, phoneNumber, (err, data) => {
+          if (!err && data) {
+            if (firstName) {
+              data.firstName = firstName;
+            }
+            if (lastName) {
+              data.lastName = lastName;
+            }
+            if (password) {
+              const hashedPassword = helpers.hash(password);
+              if (hashedPassword) {
+                data.password = hashedPassword;
+              } else {
+                return callback(500, { error: 'Hash error' });
+              }
+            }
+            // Write new data
+            _lib.update(USERS_DIR, phoneNumber, data, status => {
+              // Successful update of data
+              if (!status) {
+                return callback(300, { status: 'Update ok' });
+              } else {
+                return callback(500, { error: status });
+              }
+            });
+          } else {
+            return callback(400, { error: 'User does not exist' });
+          }
+        });
+      }
+    } else {
+      return callback(400, { error: 'Phone number invalid' });
+    }
+  });
 }
 
 /**

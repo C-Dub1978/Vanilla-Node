@@ -93,7 +93,7 @@ function confirmPostToken(data, callback) {
           // Store token
           _lib.create(TOKENS_DIR, tokenId, tokenObj, status => {
             if (!status) {
-              return callback(200, { status: 'Ok token post' });
+              return callback(200, { status: 'Ok token post', data: tokenObj });
             } else {
               return callback(500, { error: 'Could not post token' });
             }
@@ -133,7 +133,7 @@ function confirmPutToken(data, callback) {
           // Store new token file
           _lib.update(TOKENS_DIR, id, data, status => {
             if (!status) {
-              return callback(200, { status: 'Ok extending token' });
+              return callback(200, { status: 'Ok extending token', data });
             } else {
               return callback(500, { error: 'Error extending token' });
             }
