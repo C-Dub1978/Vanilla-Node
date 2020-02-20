@@ -1,9 +1,20 @@
 // Deps
+const checksConfirm = require('./checks/confirmRequests');
 const tokensConfirm = require('./tokens/confirmRequests');
 const usersConfirm = require('./users/confirmRequests');
 
+const ACCEPTABLE_METHODS = ['post', 'get', 'put', 'delete'];
+
 // Define request handlers
 const handlers = {
+  checks: (data, callback) => {
+    // Only accept the following http methods
+    if (ACCEPTABLE_METHODS.indexOf(data.method) > -1) {
+      handlers._checks[data.method](data, callback);
+    } else {
+      callback(405);
+    }
+  },
   notFound: (data, callback) => {
     callback(404);
   },
@@ -12,8 +23,7 @@ const handlers = {
   },
   tokens: (data, callback) => {
     // Only accept the following http methods
-    const acceptableMethods = ['post', 'get', 'put', 'delete'];
-    if (acceptableMethods.indexOf(data.method) > -1) {
+    if (ACCEPTABLE_METHODS.indexOf(data.method) > -1) {
       handlers._tokens[data.method](data, callback);
     } else {
       callback(405);
@@ -21,12 +31,18 @@ const handlers = {
   },
   users: (data, callback) => {
     // Only accept the following http methods
-    const acceptableMethods = ['post', 'get', 'put', 'delete'];
-    if (acceptableMethods.indexOf(data.method) > -1) {
+    if (ACCEPTABLE_METHODS.indexOf(data.method) > -1) {
       handlers._users[data.method](data, callback);
     } else {
       callback(405);
     }
+  }
+};
+
+// health checks route submethods
+handlers._checks = {
+  post: (data, callback) => {
+    return checksConfirm.post(data, callback);
   }
 };
 

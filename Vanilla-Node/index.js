@@ -57,7 +57,7 @@ const unifiedServer = (req, res) => {
     buf += decoder.end();
     // route to specific handler. If not found, use 404 handler
     const chosenHandler =
-      handlers[trimmed] != undefined ? handlers[trimmed] : handlers.notFound;
+      router[trimmed] != undefined ? router[trimmed] : router.notFound;
     const data = {
       trimmedPath: trimmed,
       queryString,
@@ -86,6 +86,9 @@ const unifiedServer = (req, res) => {
 
 // Define request router
 const router = {
-  hello: handlers.hello,
-  ping: handlers.ping
+  checks: handlers.checks,
+  notFound: handlers.notFound,
+  ping: handlers.ping,
+  tokens: handlers.tokens,
+  users: handlers.users
 };

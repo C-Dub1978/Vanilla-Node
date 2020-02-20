@@ -6,6 +6,16 @@ const crypto = require('crypto');
 const helpers = {};
 
 /**
+ * Confirm array of checks
+ *
+ * @param {[]} checks the health checks array
+ * @returns {[]} checks
+ */
+helpers.confirmHealthChecksArray = checks => {
+  return typeof checks === 'object' && checks instanceof Array ? checks : [];
+};
+
+/**
  * Confirm extends token boolean
  *
  * @param extends
@@ -13,6 +23,19 @@ const helpers = {};
  */
 helpers.confirmExtendTokenBool = extend => {
   return typeof extend === 'boolean' && extend;
+};
+
+/**
+ * Confirm http method
+ *
+ * @param {string} method
+ * @returns {string} method || {boolean}
+ */
+helpers.confirmMethod = method => {
+  return typeof method === 'string' &&
+    ['post', 'get', 'put', 'delete'].indexOf(method) > -1
+    ? method
+    : false;
 };
 
 /**
@@ -52,6 +75,46 @@ helpers.confirmPhoneNumber = phoneNumber => {
 };
 
 /**
+ * Confirm the http or https protocols
+ *
+ * @param protocol
+ * @returns {string} protocol || {boolean}
+ */
+helpers.confirmProtocol = protocol => {
+  return typeof protocol === 'string' &&
+    ['http', 'https'].indexOf(protocol) > -1
+    ? protocol
+    : false;
+};
+
+/**
+ * Confirm success codes
+ *
+ * @param {} codes the success codes
+ * @returns {} || {boolean}
+ */
+helpers.confirmSuccessCodes = codes => {
+  return typeof codes === 'object' && codes instanceof Array && codes.length > 0
+    ? codes
+    : false;
+};
+
+/**
+ * Confirm timeout in seconds
+ *
+ * @param {number} seconds
+ * @returns {number} seconds || {boolean}
+ */
+helpers.confirmTimeoutSeconds = seconds => {
+  return typeof seconds === 'number' &&
+    seconds % 1 === 0 &&
+    seconds >= 1 &&
+    seconds <= 5
+    ? seconds
+    : false;
+};
+
+/**
  * Confirm token
  *
  * @param tokenId
@@ -69,6 +132,16 @@ helpers.confirmTokenId = id => {
  */
 helpers.confirmTosAgreement = tosAgreement => {
   return typeof tosAgreement === 'boolean' && tosAgreement === true;
+};
+
+/**
+ * Confirm URL
+ *
+ * @param {string} URL
+ * @returns {string} URL || {boolean}
+ */
+helpers.confirmUrl = url => {
+  return typeof url === 'string' && url.trim().length > 0 ? url.trim() : false;
 };
 
 /**
