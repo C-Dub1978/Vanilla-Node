@@ -23,15 +23,14 @@ function checksGet(data, callback) {
   if (id) {
     _lib.read(HEALTH_CHECKS_DIR, id, (err, checksData) => {
       if (!err && checksData) {
-        console.log('DATA OBJECT: ', data);
         // Verify the headers token is a valid id
         const tokenId = helpers.confirmTokenId(data.headers.tokenid);
         // Verify the phone number from the healthCheck object is good
         const phoneNumber = helpers.confirmPhoneNumber(checksData.phoneNumber);
         if (tokenId && phoneNumber) {
           // Verify that the token belongs to the user who created the health check
-          helpers.verifyValidToken(tokenId, phoneNumber, status => {
-            if (!status) {
+          _lib.verifyValidToken(tokenId, phoneNumber, status => {
+            if (status) {
               // The user has a good token, and the phone number is connected to
               // the creator of the health check
               return callback(200, checksData);

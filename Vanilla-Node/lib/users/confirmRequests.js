@@ -11,7 +11,6 @@ const usersConfirm = {
 };
 
 const USERS_DIR = 'users';
-const TOKENS_DIR = 'tokens';
 
 /**
  * Confirm delete request
@@ -27,7 +26,7 @@ function confirmDeleteData(data, callback) {
       error: 'Invalid token/phoneNumber or token missing from header'
     });
   }
-  helpers.verifyValidToken(headerToken, phoneNumber, status => {
+  _lib.verifyValidToken(headerToken, phoneNumber, status => {
     if (!status) {
       return callback(400, { error: 'Invalid token, cannot delete data' });
     }
@@ -62,7 +61,7 @@ function confirmGetData(data, callback) {
       error: 'Invalid credentials or missing credentials'
     });
   }
-  helpers.verifyValidToken(headerToken, phoneNumber, status => {
+  _lib.verifyValidToken(headerToken, phoneNumber, status => {
     if (status) {
       _lib.read(USERS_DIR, phoneNumber, (err, data) => {
         if (!err && data) {
@@ -142,7 +141,7 @@ function confirmPutData(data, callback) {
       error: 'Invalid token or token missing from header'
     });
   }
-  helpers.verifyValidToken(headerToken, phoneNumber, status => {
+  _lib.verifyValidToken(headerToken, phoneNumber, status => {
     if (!status) {
       return callback(400, { error: 'Invalid token, cannot put data' });
     }

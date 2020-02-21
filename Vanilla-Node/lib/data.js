@@ -1,7 +1,3 @@
-/**
- * This is a custom library used to store/edit data
- */
-
 // Define deps
 const fs = require('fs');
 const helpers = require('./helpers');
@@ -126,6 +122,24 @@ lib.update = (dir, file, data, callback) => {
       }
     }
   );
+};
+
+/**
+ *
+ */
+lib.verifyValidToken = (tokenId, phoneNumber, callback) => {
+  if (!phoneNumber || !tokenId) {
+    return callback(false);
+  }
+  lib.read('tokens', tokenId, (err, data) => {
+    if (!err && data) {
+      return callback(
+        data.phoneNumber === phoneNumber && data.expires > Date.now()
+      );
+    } else {
+      return callback(false);
+    }
+  });
 };
 
 module.exports = lib;
