@@ -10,7 +10,8 @@ const USERS_DIR = 'users';
 // Module container
 const checksConfirm = {
   get: (data, callback) => checksGet(data, callback),
-  post: (data, callback) => checksPost(data, callback)
+  post: (data, callback) => checksPost(data, callback),
+  put: (data, callback) => checksPut(data, callback)
 };
 
 /**
@@ -35,7 +36,7 @@ function checksGet(data, callback) {
               // the creator of the health check
               return callback(200, checksData);
             } else {
-              return callback(403, {
+              return callback(404, {
                 error: 'Cant verify that user created the health check'
               });
             }
@@ -144,6 +145,87 @@ function checksPost(data, callback) {
     }
   } else {
     return callback(400, { error: 'Missing required params for check' });
+  }
+}
+
+/**
+ * Health check put request
+ *
+ * @params {data} checkId (mandatory), protocol, url, method, successCodes, timeout
+ * @returns {function} the callback function
+ */
+function checksPut(data, callback) {
+  const checkId = helpers.confirmHealthCheckId(data.payload.checkId);
+  const protocol = helpers.confirmProtocol(data.payload.protocol);
+  const url = helpers.confirmUrl(data.payload.url);
+  const method = helpers.confirmMethod(data.payload.method);
+  const successCodes = helpers.confirmSuccessCodes(data.payload.successCodes);
+  const timeoutSeconds = helpers.confirmTimeoutSeconds(
+    data.payload.timeoutSeconds
+  );
+  const tokenId = helpers.confirmTokenId(data.headers.tokenid);
+  if (tokenId && checkId) {
+    if (protocol || url || method || successCodes || timeoutSeconds) {
+      _lib.read(TOKENS_DIR, tokenId, (err, token) => {
+        if (!err && token) {
+          const phoneNumber = helpers.confirmPhoneNumber(token.phoneNumber);
+          if (phoneNumber) {
+            _lib.verifyValidToken(tokenId, phoneNumber, status => {
+              if (status) {
+                // TODO this needs a checkId not a tokenId
+                _lib.read(HEALTH_CHECKS_DIR, checkId, (err, check) => {
+                  if (!err && check) {
+                    // health check found, update it
+                    const newCheck = {
+                      id: checkId,
+                      protocol: protocol || check.protocol,
+                      url: url || check.url,
+                      method: method || check.method,
+                      successCodes: successCodes || check.successCodes,
+                      timeoutSeconds: timeoutSeconds || check.timeoutSeconds
+                    };
+                    _lib.update(
+                      HEALTH_CHECKS_DIR,
+                      checkId,
+                      newCheck,
+                      status => {
+                        if (!status) {
+                          // Successfully updated healthCheck
+                          return callback(200, {
+                            status: 'Ok updating health check'
+                          });
+                        } else {
+                          // Server error
+                          return callback(500, {
+                            error: 'Error updating health check'
+                          });
+                        }
+                      }
+                    );
+                  } else {
+                    return callback(404, { error: 'Cannot find health check' });
+                  }
+                });
+              } else {
+                return callback(404, { error: 'Cannot validate token' });
+              }
+            });
+          } else {
+            return callback(403, {
+              error: 'Cannot validate credentials from the token'
+            });
+          }
+        } else {
+          return callback(500, { error: 'Error reading that token' });
+        }
+      });
+    } else {
+      return callback(403, {
+        error: 'Missing or invalid parameters to update check'
+      });
+    }
+  } else {
+    return callback(403, { error: 'Invalid or missing tokenid or checkId' });
   }
 }
 

@@ -46,6 +46,9 @@ handlers._checks = {
   },
   post: (data, callback) => {
     return checksConfirm.post(data, callback);
+  },
+  put: (data, callback) => {
+    return checksConfirm.put(data, callback);
   }
 };
 

@@ -1,9 +1,1 @@
-{
-  "id": "hqbmnfckfauisaquosfn",
-  "phoneNumber": "3038105328",
-  "protocol": "http",
-  "url": "eltonleejones.com",
-  "method": "post",
-  "successCodes": [200, 300],
-  "timeoutSeconds": 5
-}
+{"id":"hqbmnfckfauisaquosfn","protocol":"http","url":"eltonleejones.juju-jhonstone.com","method":"get","successCodes":[200,300,500],"timeoutSeconds":5}
