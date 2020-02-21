@@ -27,7 +27,7 @@ function confirmDeleteData(data, callback) {
       error: 'Invalid token/phoneNumber or token missing from header'
     });
   }
-  verifyValidToken(headerToken, phoneNumber, status => {
+  helpers.verifyValidToken(headerToken, phoneNumber, status => {
     if (!status) {
       return callback(400, { error: 'Invalid token, cannot delete data' });
     }
@@ -62,7 +62,7 @@ function confirmGetData(data, callback) {
       error: 'Invalid credentials or missing credentials'
     });
   }
-  verifyValidToken(headerToken, phoneNumber, status => {
+  helpers.verifyValidToken(headerToken, phoneNumber, status => {
     if (status) {
       _lib.read(USERS_DIR, phoneNumber, (err, data) => {
         if (!err && data) {
@@ -142,7 +142,7 @@ function confirmPutData(data, callback) {
       error: 'Invalid token or token missing from header'
     });
   }
-  verifyValidToken(headerToken, phoneNumber, status => {
+  helpers.verifyValidToken(headerToken, phoneNumber, status => {
     if (!status) {
       return callback(400, { error: 'Invalid token, cannot put data' });
     }
@@ -181,27 +181,6 @@ function confirmPutData(data, callback) {
       }
     } else {
       return callback(400, { error: 'Phone number invalid' });
-    }
-  });
-}
-
-/**
- * Verify token is valid and unexpired
- *
- * @param {string, string} data the tokenId and phoneNumber
- * @returns {function} callback the callback function
- */
-function verifyValidToken(tokenId, phoneNumber, callback) {
-  if (!phoneNumber || !tokenId) {
-    return callback(false);
-  }
-  _lib.read(TOKENS_DIR, tokenId, (err, data) => {
-    if (!err && data) {
-      return callback(
-        data.phoneNumber === phoneNumber && data.expires > Date.now()
-      );
-    } else {
-      return callback(false);
     }
   });
 }

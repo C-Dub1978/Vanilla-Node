@@ -41,6 +41,9 @@ const handlers = {
 
 // health checks route submethods
 handlers._checks = {
+  get: (data, callback) => {
+    return checksConfirm.get(data, callback);
+  },
   post: (data, callback) => {
     return checksConfirm.post(data, callback);
   }

@@ -1,6 +1,7 @@
 // Deps
 const config = require('../config');
 const crypto = require('crypto');
+const _lib = require('./data');
 
 // Helper functions
 const helpers = {};
@@ -13,6 +14,16 @@ const helpers = {};
  */
 helpers.confirmHealthChecksArray = checks => {
   return typeof checks === 'object' && checks instanceof Array ? checks : [];
+};
+
+/**
+ * Confirm healthCheck id
+ *
+ * @param {string} id the healthCheck id
+ * @returns
+ */
+helpers.confirmHealthCheckId = id => {
+  return typeof id === 'string' && id.trim().length === 20 ? id.trim() : false;
 };
 
 /**
@@ -193,6 +204,27 @@ helpers.parseJsonToObject = json => {
       return {};
     }
   }
+};
+
+/**
+ * Verify token is valid and unexpired
+ *
+ * @param {string, string} data the tokenId and phoneNumber
+ * @returns {function} callback the callback function
+ */
+helpers.verifyValidToken = (tokenId, phoneNumber, callback) => {
+  if (!phoneNumber || !tokenId) {
+    return callback(false);
+  }
+  _lib.read(TOKENS_DIR, tokenId, (err, data) => {
+    if (!err && data) {
+      return callback(
+        data.phoneNumber === phoneNumber && data.expires > Date.now()
+      );
+    } else {
+      return callback(false);
+    }
+  });
 };
 
 module.exports = helpers;
