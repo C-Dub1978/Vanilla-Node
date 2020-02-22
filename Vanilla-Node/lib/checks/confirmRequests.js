@@ -9,10 +9,103 @@ const USERS_DIR = 'users';
 
 // Module container
 const checksConfirm = {
+  delete: (data, callback) => checksDelete(data, callback),
   get: (data, callback) => checksGet(data, callback),
   post: (data, callback) => checksPost(data, callback),
   put: (data, callback) => checksPut(data, callback)
 };
+
+/**
+ *
+ * @param {*} data, the check id
+ * @param {function} callback function
+ */
+function checksDelete(data, callback) {
+  const checkId = helpers.confirmHealthCheckId(data.queryString.checkId);
+  const tokenId = helpers.confirmTokenId(data.headers.tokenid);
+  if (checkId && tokenId) {
+    // Read health check
+    _lib.read(HEALTH_CHECKS_DIR, checkId, (err, checkData) => {
+      if (!err && checkData) {
+        // Health check came back, get the token
+        _lib.read(TOKENS_DIR, tokenId, (err, tokenData) => {
+          if (!err && tokenData) {
+            // Token came back, get phone number from it for validation
+            const phoneNumber = helpers.confirmPhoneNumber(
+              tokenData.phoneNumber
+            );
+            // Validate token
+            _lib.verifyValidToken(tokenId, phoneNumber, status => {
+              // Token is valid
+              if (status) {
+                // Delete the health check
+                _lib.delete(HEALTH_CHECKS_DIR, checkId, err => {
+                  if (!err) {
+                    // Now we need to get the user data and remove check id from
+                    // the checks array
+                    _lib.read(USERS_DIR, phoneNumber, (err, userData) => {
+                      if (!err && userData) {
+                        // Get checks array
+                        const checks = helpers.confirmHealthChecksArray(
+                          userData.checks
+                        );
+                        let newUserData = {};
+                        let newChecks;
+                        if (checks && checks.length > 0) {
+                          // Get the index of the check id and splice it
+                          const index = checks.indexOf(checkId);
+                          if (index > -1) {
+                            newChecks = checks.splice(index, 1);
+                            newUserData = { ...userData, checks: newChecks };
+                            _lib.update(
+                              USERS_DIR,
+                              phoneNumber,
+                              newUserData,
+                              err => {
+                                if (!err) {
+                                  return callback(200, {
+                                    status: 'Ok updating health check'
+                                  });
+                                } else {
+                                  return callback(500, { error: err });
+                                }
+                              }
+                            );
+                          } else {
+                            return callback(403, {
+                              error:
+                                'Health check does not exist in user object'
+                            });
+                          }
+                        } else {
+                          return callback(403, {
+                            error: 'Error finding health check array from user'
+                          });
+                        }
+                      } else {
+                        return callback(403, {
+                          error: 'Error getting that user'
+                        });
+                      }
+                    });
+                  }
+                });
+              } else {
+                return callback(403, { error: 'Cannot validate token' });
+              }
+            });
+          } else {
+            return callback(404, { error: 'Invalid token id' });
+          }
+        });
+      } else {
+        return callback(404, { error: 'Error getting that health check' });
+      }
+    });
+  } else {
+    return callback(400, { error: 'Missing health check id or token' });
+  }
+}
 
 /**
  *
