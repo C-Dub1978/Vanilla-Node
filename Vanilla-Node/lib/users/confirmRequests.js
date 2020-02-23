@@ -11,6 +11,7 @@ const usersConfirm = {
 };
 
 const USERS_DIR = 'users';
+const HEALTH_CHECKS_DIR = 'checks';
 
 /**
  * Confirm delete request
@@ -35,7 +36,35 @@ function confirmDeleteData(data, callback) {
         _lib.delete(USERS_DIR, phoneNumber, status => {
           // Delete operation successful
           if (!status) {
-            return callback(200, { status: 'Delete ok' });
+            // Now clean up all users health checks
+            const healthChecks = helpers.confirmHealthChecksArray(data.checks);
+            const length = healthChecks.length;
+            if (length > 0) {
+              let checksDeleted = 0;
+              let deletionErrors = false;
+              // Loop through checks directory and delete each object
+              healthChecks.forEach(check => {
+                _lib.delete(HEALTH_CHECKS_DIR, check, err => {
+                  if (err) {
+                    deletionErrors = true;
+                  }
+                  checksDeleted++;
+                  if (checksDeleted === length) {
+                    if (!deletionErrors) {
+                      return callback(200, {
+                        status: 'Ok deleting all user health checks'
+                      });
+                    } else {
+                      return callback(500, {
+                        error: 'Errors encountered deleting user health checks'
+                      });
+                    }
+                  }
+                });
+              });
+            } else {
+              return callback(200, { status: 'Delete ok' });
+            }
           } else {
             return callback(500, { error: status });
           }

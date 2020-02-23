@@ -1,6 +1,8 @@
 // Deps
 const config = require('../config');
 const crypto = require('crypto');
+const https = require('https');
+const queryString = require('querystring');
 
 // Helper functions
 const helpers = {
@@ -209,6 +211,58 @@ const helpers = {
       } catch (err) {
         return {};
       }
+    }
+  },
+
+  /**
+   * Send SMS via twilio API
+   *
+   * @params {string} phoneNumber, text message
+   */
+  sendTwilioSms: (phoneNumber, msg, callback) => {
+    const phone = helpers.confirmPhoneNumber(phoneNumber);
+    const text = helpers.confirmName(msg);
+
+    if (phone && text) {
+      // Configure request payload
+      const payload = {
+        From: config.twilio.fromPhone,
+        To: '+1' + phone,
+        Body: text
+      };
+      // Stringify the payload using the querystring module
+      const stringifiedPayload = queryString.stringify(payload);
+      const reqDetails = {
+        protocol: 'https:',
+        hostname: 'api.twilio.com',
+        method: 'POST',
+        path:
+          '/2010-04-01/Accounts/' + config.twilio.accountSid + '/Messages.json',
+        auth: config.twilio.accountSid + ':' + config.twilio.authToken,
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+          'Content-Length': Buffer.byteLength(stringifiedPayload)
+        }
+      };
+      // Instantiate requqest
+      const req = https.request(reqDetails, res => {
+        if (res.statusCode === 200 || res.statusCode === 201) {
+          callback(false);
+        } else {
+          callback('Status code: ', res.statusCode);
+        }
+      });
+
+      // Bind to error so it doesnt get thrown
+      req.on('error', err => {
+        callback(err);
+      });
+      // Write payload to request
+      req.write(stringifiedPayload);
+      // Send it
+      req.end();
+    } else {
+      callback('Invalid or missings parameters for text message');
     }
   }
 };
