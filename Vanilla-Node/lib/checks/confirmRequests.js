@@ -244,7 +244,7 @@ function checksPost(data, callback) {
 /**
  * Health check put request
  *
- * @params {data} checkId (mandatory), protocol, url, method, successCodes, timeout
+ * @param {data} checkId (mandatory), protocol, url, method, successCodes, timeout
  * @returns {function} the callback function
  */
 function checksPut(data, callback) {

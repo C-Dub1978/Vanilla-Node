@@ -65,6 +65,101 @@ lib.delete = (dir, file, callback) => {
 };
 
 /**
+ * Make sure directory structure exists
+ */
+lib.initialize = () => {
+  // Ensure the .data directory exists, if not, create
+  fs.readdir(path.join(__dirname, '../.data'), err => {
+    if (err) {
+      fs.mkdir(path.join(__dirname, '../.data'), err => {
+        if (err) {
+          console.log('Error creating .dir directory');
+          process.exit(1);
+        } else {
+          console.log('.data directory created successfully');
+          // Ensure that checks directory exists, if not, create
+          fs.readdir(path.join(__dirname, '../.data/checks'), err => {
+            if (err) {
+              // Create it
+              fs.mkdir(path.join(__dirname, '../.data/checks'), err => {
+                if (err) {
+                  console.log('Error creating checks directory');
+                } else {
+                  console.log('Checks directory created successfully');
+                }
+              });
+            } else {
+              console.log('Checks directory already exists');
+            }
+          });
+
+          // Ensure that tokens directory exists, if not, create
+          fs.readdir(path.join(__dirname, '../.data/tokens'), err => {
+            if (err) {
+              // Create it
+              fs.mkdir(path.join(__dirname, '../.data/tokens'), err => {
+                if (err) {
+                  console.log('Error creating tokens directory');
+                  process.exit(1);
+                } else {
+                  console.log('Tokens directory created successfully');
+                }
+              });
+            } else {
+              console.log('Tokens directory already exists');
+            }
+          });
+
+          // Ensure that users directory exists, if not, create
+          fs.readdir(path.join(__dirname, '../.data/users'), err => {
+            if (err) {
+              // Create it
+              fs.mkdir(path.join(__dirname, '../.data/users'), err => {
+                if (err) {
+                  console.log('Error creating users directory');
+                  process.exit(1);
+                } else {
+                  console.log('Users directory created successfully');
+                }
+              });
+            } else {
+              console.log('Users directory already exists');
+            }
+          });
+        }
+      });
+    } else {
+      console.log('.data directory already exists');
+    }
+  });
+};
+
+/**
+ * List all files in a specific directory
+ *
+ * @param {string} dir, the directory
+ * @param {function} the callback function
+ */
+lib.listDir = (directory, callback) => {
+  return typeof directory === 'string'
+    ? fs.readdir(lib.baseDir + directory + '/', (err, files) => {
+        if (!err && files && files.length > 0) {
+          // Trim the extension off each file
+          const trimmed = [];
+          files.forEach(file => {
+            let splitFile = file.split('.');
+            trimmed.push(splitFile[0]);
+          });
+          return callback(trimmed);
+        } else {
+          // Error reading, return false
+          return callback(false);
+        }
+      })
+    : callback(false);
+};
+
+/**
  * Read function
  *
  * @param dir the directory to find the file to open

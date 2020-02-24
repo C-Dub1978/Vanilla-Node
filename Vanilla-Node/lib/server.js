@@ -7,6 +7,7 @@ const handlers = require('./handlers');
 const helpers = require('./helpers');
 const http = require('http');
 const https = require('https');
+const _lib = require('./data');
 const path = require('path');
 const url = require('url');
 // for payloads
@@ -99,6 +100,8 @@ server.initialize = () => {
   server.httpsServer.listen(config.httpsPort, () => {
     console.log('Server listening on https port: ', config.httpsPort);
   });
+  // Ensure directory structure exists
+  _lib.initialize();
 };
 
 module.exports = server;

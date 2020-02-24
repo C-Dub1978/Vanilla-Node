@@ -17,6 +17,12 @@ const helpers = {
   },
 
   /**
+   * Confirm health check object
+   *
+   * @param
+   */
+
+  /**
    * Confirm healthCheck id
    *
    * @param {string} id the healthCheck id
@@ -54,7 +60,7 @@ const helpers = {
   /**
    * Confirm first name
    *
-   * @params firstName
+   * @param firstName
    * @returns {string} trimmed first name || {boolean}
    */
   confirmName: name => {
@@ -166,7 +172,7 @@ const helpers = {
   /**
    * Function to create a random string of letters for a token
    *
-   * @params number the character length
+   * @param number the character length
    */
   createRandomString: length => {
     const strLength = typeof length === 'number' && length > 0 ? length : 20;
@@ -217,7 +223,7 @@ const helpers = {
   /**
    * Send SMS via twilio API
    *
-   * @params {string} phoneNumber, text message
+   * @param {string} phoneNumber, text message
    */
   sendTwilioSms: (phoneNumber, msg, callback) => {
     const phone = helpers.confirmPhoneNumber(phoneNumber);
