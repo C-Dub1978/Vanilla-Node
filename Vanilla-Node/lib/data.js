@@ -77,59 +77,64 @@ lib.initialize = () => {
           process.exit(1);
         } else {
           console.log('.data directory created successfully');
-          // Ensure that checks directory exists, if not, create
-          fs.readdir(path.join(__dirname, '../.data/checks'), err => {
-            if (err) {
-              // Create it
-              fs.mkdir(path.join(__dirname, '../.data/checks'), err => {
-                if (err) {
-                  console.log('Error creating checks directory');
-                } else {
-                  console.log('Checks directory created successfully');
-                }
-              });
-            } else {
-              console.log('Checks directory already exists');
-            }
-          });
-
-          // Ensure that tokens directory exists, if not, create
-          fs.readdir(path.join(__dirname, '../.data/tokens'), err => {
-            if (err) {
-              // Create it
-              fs.mkdir(path.join(__dirname, '../.data/tokens'), err => {
-                if (err) {
-                  console.log('Error creating tokens directory');
-                  process.exit(1);
-                } else {
-                  console.log('Tokens directory created successfully');
-                }
-              });
-            } else {
-              console.log('Tokens directory already exists');
-            }
-          });
-
-          // Ensure that users directory exists, if not, create
-          fs.readdir(path.join(__dirname, '../.data/users'), err => {
-            if (err) {
-              // Create it
-              fs.mkdir(path.join(__dirname, '../.data/users'), err => {
-                if (err) {
-                  console.log('Error creating users directory');
-                  process.exit(1);
-                } else {
-                  console.log('Users directory created successfully');
-                }
-              });
-            } else {
-              console.log('Users directory already exists');
-            }
-          });
+          lib.initSubDirectories();
         }
       });
     } else {
       console.log('.data directory already exists');
+      lib.initSubDirectories();
+    }
+  });
+};
+
+lib.initSubDirectories = () => {
+  // Ensure that checks directory exists, if not, create
+  fs.readdir(path.join(__dirname, '../.data/checks'), err => {
+    if (err) {
+      // Create it
+      fs.mkdir(path.join(__dirname, '../.data/checks'), err => {
+        if (err) {
+          console.log('Error creating checks directory');
+        } else {
+          console.log('Checks directory created successfully');
+        }
+      });
+    } else {
+      console.log('Checks directory already exists');
+    }
+  });
+
+  // Ensure that tokens directory exists, if not, create
+  fs.readdir(path.join(__dirname, '../.data/tokens'), err => {
+    if (err) {
+      // Create it
+      fs.mkdir(path.join(__dirname, '../.data/tokens'), err => {
+        if (err) {
+          console.log('Error creating tokens directory');
+          process.exit(1);
+        } else {
+          console.log('Tokens directory created successfully');
+        }
+      });
+    } else {
+      console.log('Tokens directory already exists');
+    }
+  });
+
+  // Ensure that users directory exists, if not, create
+  fs.readdir(path.join(__dirname, '../.data/users'), err => {
+    if (err) {
+      // Create it
+      fs.mkdir(path.join(__dirname, '../.data/users'), err => {
+        if (err) {
+          console.log('Error creating users directory');
+          process.exit(1);
+        } else {
+          console.log('Users directory created successfully');
+        }
+      });
+    } else {
+      console.log('Users directory already exists');
     }
   });
 };

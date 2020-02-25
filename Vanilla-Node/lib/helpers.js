@@ -7,6 +7,16 @@ const queryString = require('querystring');
 // Helper functions
 const helpers = {
   /**
+   * Confirm extends token boolean
+   *
+   * @param extends
+   * @returns {boolean}
+   */
+  confirmExtendTokenBool: extend => {
+    return typeof extend === 'boolean' && extend;
+  },
+
+  /**
    * Confirm array of checks
    *
    * @param {[]} checks the health checks array
@@ -26,7 +36,7 @@ const helpers = {
    * Confirm healthCheck id
    *
    * @param {string} id the healthCheck id
-   * @returns
+   * @returns {string} || {boolean}
    */
   confirmHealthCheckId: id => {
     return typeof id === 'string' && id.trim().length === 20
@@ -35,13 +45,35 @@ const helpers = {
   },
 
   /**
-   * Confirm extends token boolean
+   * Confirm the health check object
    *
-   * @param extends
+   * @param {check} the health check object
+   * @returns {check} || {}
+   */
+  confirmHealthCheckObject: check => {
+    return typeof check === 'object' && check != null ? check : {};
+  },
+
+  /**
+   * Confirm health check state
+   *
+   * @param {string} state
    * @returns {boolean}
    */
-  confirmExtendTokenBool: extend => {
-    return typeof extend === 'boolean' && extend;
+  confirmHealthCheckState: state => {
+    return typeof state === 'string' && ['up', 'down'].indexOf(state) > -1
+      ? state
+      : false;
+  },
+
+  /**
+   * Confirm last checked
+   *
+   * @param {number} lastChecked
+   * @returns {boolean}
+   */
+  confirmLastChecked: lastChecked => {
+    return typeof lastChecked === 'number';
   },
 
   /**

@@ -53,7 +53,7 @@ workers.gatherAllChecks = () => {
         _lib.read(CHECKS_DIR, check, (err, originalCheckData) => {
           if (!err && originalCheckData) {
             // Pass check to check validator
-            workers.validateCheckData(check);
+            workers.validateCheckData(originalCheckData);
           } else {
             console.log('Error reading check in worker executor');
           }
@@ -190,7 +190,7 @@ workers.processCheckOutcome = (check, outcome) => {
 workers.validateCheckData = check => {
   check = helpers.confirmHealthCheckObject(check);
   check.id = helpers.confirmHealthCheckId(check.id);
-  check.phone = helpers.confirmPhoneNumber(check.phoneNumber);
+  check.phoneNumber = helpers.confirmPhoneNumber(check.phoneNumber);
   check.protocol = helpers.confirmProtocol(check.protocol);
   check.url = helpers.confirmUrl(check.url);
   check.method = helpers.confirmMethod(check.method);
@@ -204,7 +204,7 @@ workers.validateCheckData = check => {
   // If all checks pass, pass data to next step in validation process
   if (
     check.id &&
-    check.phone &&
+    check.phoneNumber &&
     check.protocol &&
     check.url &&
     check.method &&
