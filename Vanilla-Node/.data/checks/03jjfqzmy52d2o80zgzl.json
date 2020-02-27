@@ -1,1 +1,1 @@
-{"id":"03jjfqzmy52d2o80zgzl","phoneNumber":"3038105328","protocol":"https","url":"google.com","method":"get","successCodes":[200,201,300,301],"timeoutSeconds":5,"state":"down","lastChecked":1582773724538}
+{"id":"03jjfqzmy52d2o80zgzl","phoneNumber":"3038105328","protocol":"http","url":"npm.com","method":"get","successCodes":[200,201,300,301],"timeoutSeconds":5,"state":"up","lastChecked":1582778716941}

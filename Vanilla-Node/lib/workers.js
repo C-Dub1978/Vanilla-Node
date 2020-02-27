@@ -1,11 +1,8 @@
 // Deps
-const config = require('../config');
-const fs = require('fs');
 const helpers = require('./helpers');
 const http = require('http');
 const https = require('https');
 const _lib = require('./data');
-const path = require('path');
 const url = require('url');
 
 const CHECKS_DIR = 'checks';
@@ -95,7 +92,7 @@ workers.performCheck = check => {
   // Build request
   const requestDetails = {
     protocol: check.protocol + ':',
-    hostName,
+    hostname: hostName,
     method: check.method.toUpperCase(),
     path,
     timeout: check.timeoutSeconds * 1000
@@ -108,7 +105,7 @@ workers.performCheck = check => {
     // Get status code
     const status = res.statusCode;
     // Update outcome object
-    outcome.status = status;
+    outcome.responseCode = status;
     if (!outcomeSent) {
       workers.processCheckOutcome(check, outcome);
       outcomeSent = true;
