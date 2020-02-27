@@ -29,14 +29,18 @@ const helpers = {
   /**
    * Confirm health check object
    *
-   * @param
+   * @param {check} the health check object
+   * @reutns {check} || {}
    */
+  confirmHealthCheckObject: check => {
+    return typeof check === 'object' && check != null ? check : {};
+  },
 
   /**
    * Confirm healthCheck id
    *
    * @param {string} id the healthCheck id
-   * @returns {string} || {boolean}
+   * @returns {string} the id || {boolean}
    */
   confirmHealthCheckId: id => {
     return typeof id === 'string' && id.trim().length === 20
@@ -45,35 +49,25 @@ const helpers = {
   },
 
   /**
-   * Confirm the health check object
-   *
-   * @param {check} the health check object
-   * @returns {check} || {}
-   */
-  confirmHealthCheckObject: check => {
-    return typeof check === 'object' && check != null ? check : {};
-  },
-
-  /**
-   * Confirm health check state
+   * Confirm health check state (up or down)
    *
    * @param {string} state
-   * @returns {boolean}
+   * @returns {string} the state
    */
   confirmHealthCheckState: state => {
     return typeof state === 'string' && ['up', 'down'].indexOf(state) > -1
       ? state
-      : false;
+      : 'down';
   },
 
   /**
    * Confirm last checked
    *
-   * @param {number} lastChecked
-   * @returns {boolean}
+   * @param {number} last the timestamp of last checked
+   * @returns {number} last || {boolean}
    */
-  confirmLastChecked: lastChecked => {
-    return typeof lastChecked === 'number';
+  confirmLastChecked: last => {
+    return typeof last === 'number' && last > 0 ? last : false;
   },
 
   /**
@@ -212,7 +206,7 @@ const helpers = {
     let randomStr = '';
     for (let i = 0; i < strLength; i++) {
       randomStr += chars.charAt(
-        Math.floor(Math.random() * Math.floor(strLength + 1))
+        Math.floor(Math.random() * Math.floor(chars.length + 1))
       );
     }
     return randomStr;

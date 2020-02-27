@@ -21,10 +21,10 @@ const workers = {};
 workers.alertUserToStateChange = check => {
   const message = `Alert! Your check for:
   ${check.method.toUpperCase()} ${check.protocol}://${check.url}
-  is current in a state of '${check.state}'`;
+  is current and has changed to a state of '${check.state}'`;
   helpers.sendTwilioSms(check.phoneNumber, message, err => {
     if (!err) {
-      console.log('Alerted user to check state change with SMS');
+      console.log(message);
     } else {
       console.log('Error in SMS alert: ', err);
     }
@@ -174,7 +174,13 @@ workers.processCheckOutcome = (check, outcome) => {
         workers.alertUserToStateChange(newCheck);
       } else {
         // Check state not changed, do nothing
-        console.log('Check ' + newCheck.id + ' state unchanged');
+        console.log(
+          'State for check: ' +
+            newCheck.id +
+            ' is unchanged from ' +
+            newCheck.state +
+            ' state'
+        );
       }
     } else {
       console.log('Error updating check ' + newCheck.id);
